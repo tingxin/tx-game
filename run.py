@@ -23,17 +23,20 @@ def check_aws_credentials():
     """检查 AWS 凭证配置"""
     aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    aws_region = os.environ.get('AWS_DEFAULT_REGION')
+    aws_region = os.environ.get('AWS_REGION', 'us-east-1')
     
-    if not all([aws_access_key, aws_secret_key]):
+    if not aws_access_key or not aws_secret_key:
         print("⚠️  AWS 凭证未配置")
         print("请设置环境变量:")
-        print("export AWS_ACCESS_KEY_ID=your_access_key")
-        print("export AWS_SECRET_ACCESS_KEY=your_secret_key")
-        print("export AWS_DEFAULT_REGION=us-east-1")
+        print("export AWS_ACCESS_KEY_ID=your_access_key_id")
+        print("export AWS_SECRET_ACCESS_KEY=your_secret_access_key")
+        print("export AWS_REGION=us-east-1  # 可选，默认 us-east-1")
+        print("\n或者在代码中直接设置:")
+        print("os.environ['AWS_ACCESS_KEY_ID'] = 'your_key'")
+        print("os.environ['AWS_SECRET_ACCESS_KEY'] = 'your_secret'")
         return False
     
-    print("✅ AWS 凭证配置检查通过")
+    print(f"✅ AWS 凭证配置检查通过 (Region: {aws_region})")
     return True
 
 def main():

@@ -15,17 +15,25 @@
    pip install -r requirements.txt
 
 2. 配置 AWS 凭证（必需）：
+   
+   方式A - 环境变量（推荐）：
    export AWS_ACCESS_KEY_ID=your_access_key_id
    export AWS_SECRET_ACCESS_KEY=your_secret_access_key  
-   export AWS_DEFAULT_REGION=us-east-1
+   export AWS_REGION=us-east-1
+   
+   方式B - 直接在 config.py 中设置：
+   编辑 config.py 文件，取消注释并填入你的凭证
 
-3. 启动服务：
+3. 测试 AWS 连接（可选）：
+   python test_aws.py
+
+4. 启动服务：
    python run.py
    
    或者直接：
    python app.py
 
-4. 打开浏览器访问：
+5. 打开浏览器访问：
    http://localhost:5000
 
 ✨ 功能特性：

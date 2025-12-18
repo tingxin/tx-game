@@ -6,10 +6,14 @@ import json
 import os
 from werkzeug.utils import secure_filename
 import logging
+from config import setup_aws_credentials
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# 设置 AWS 凭证
+setup_aws_credentials()
 
 app = Flask(__name__)
 CORS(app)
@@ -23,11 +27,23 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # AWS Bedrock 配置
-# 注意：确保你的 AWS 凭证已正确配置
-bedrock_client = boto3.client(
-    'bedrock-runtime',
-    region_name='us-east-1'  # 根据你的区域调整
-)
+# 从环境变量获取 AK/SK
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+
+# 初始化 Bedrock 客户端
+def get_bedrock_client():
+    """获取 Bedrock 客户端"""
+    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
+        raise Exception("AWS 凭证未配置，请设置 AWS_ACCESS_KEY_ID 和 AWS_SECRET_ACCESS_KEY 环境变量")
+    
+    return boto3.client(
+        'bedrock-runtime',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        region_name=AWS_REGION
+    )
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -73,7 +89,8 @@ def analyze_image_with_bedrock(image_base64, image_format):
             ]
         }
 
-        # 调用 Bedrock API
+        # 获取 Bedrock 客户端并调用 API
+        bedrock_client = get_bedrock_client()
         response = bedrock_client.invoke_model(
             modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",  # Sonnet 4 模型ID
             body=json.dumps(request_body),
