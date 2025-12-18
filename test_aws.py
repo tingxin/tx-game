@@ -35,31 +35,30 @@ def test_bedrock_connection():
             region_name=aws_region
         )
         
-        # 测试 Nova 模型的文本请求
-        request_body = {
-            "inputText": "Hello, please respond with 'Connection successful!'",
-            "textGenerationConfig": {
-                "maxTokenCount": 100,
+        print("📡 发送测试请求到 Nova 模型...")
+        
+        # 使用 Converse API 测试 Nova 模型
+        response = bedrock_client.converse(
+            modelId="us.amazon.nova-pro-v1:0",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "text": "Hello, please respond with 'Connection successful!'"
+                        }
+                    ]
+                }
+            ],
+            inferenceConfig={
+                "maxTokens": 100,
                 "temperature": 0.7,
                 "topP": 0.9
             }
-        }
-        
-        print("📡 发送测试请求到 Nova 模型...")
-        response = bedrock_client.invoke_model(
-            modelId="amazon.nova-pro-v1:0",
-            body=json.dumps(request_body),
-            contentType="application/json"
         )
         
         # 解析 Nova 响应
-        response_body = json.loads(response['body'].read())
-        if 'outputText' in response_body:
-            result = response_body['outputText']
-        elif 'results' in response_body and len(response_body['results']) > 0:
-            result = response_body['results'][0]['outputText']
-        else:
-            result = str(response_body)
+        result = response['output']['message']['content'][0]['text']
         
         print(f"✅ 连接成功！响应: {result}")
         return True

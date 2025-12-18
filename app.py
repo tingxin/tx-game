@@ -58,53 +58,49 @@ def encode_image_to_base64(image_path):
 def analyze_image_with_bedrock(image_base64, image_format):
     """使用 AWS Bedrock Nova 模型分析图片"""
     try:
-        # Nova 模型请求体格式
-        request_body = {
-            "inputText": """请详细分析这张图片的内容，包括：
+        # 获取 Bedrock 客户端
+        bedrock_client = get_bedrock_client()
+        
+        # 将 base64 字符串转换回字节
+        image_bytes = base64.b64decode(image_base64)
+        
+        # 使用 Converse API 调用 Nova 模型
+        response = bedrock_client.converse(
+            modelId="us.amazon.nova-pro-v1:0",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "image": {
+                                "format": image_format,
+                                "source": {
+                                    "bytes": image_bytes
+                                }
+                            }
+                        },
+                        {
+                            "text": """请详细分析这张图片的内容，包括：
 1. 主要物体和场景描述
 2. 颜色、构图和视觉元素
 3. 可能的情感或氛围
 4. 任何文字内容（如果有）
 5. 图片的整体质量和特点
 
-请用中文回答，内容要详细且专业。""",
-            "textGenerationConfig": {
-                "maxTokenCount": 2000,
+请用中文回答，内容要详细且专业。"""
+                        }
+                    ]
+                }
+            ],
+            inferenceConfig={
+                "maxTokens": 2000,
                 "temperature": 0.7,
                 "topP": 0.9
-            },
-            "inferenceConfig": {
-                "max_new_tokens": 2000
-            },
-            "images": [
-                {
-                    "format": image_format.upper(),
-                    "source": {
-                        "bytes": image_base64
-                    }
-                }
-            ]
-        }
-
-        # 获取 Bedrock 客户端并调用 API
-        bedrock_client = get_bedrock_client()
-        response = bedrock_client.invoke_model(
-            modelId="amazon.nova-pro-v1:0",  # Nova Pro 模型ID
-            body=json.dumps(request_body),
-            contentType="application/json"
+            }
         )
-
-        # 解析响应
-        response_body = json.loads(response['body'].read())
         
-        # Nova 模型的响应格式
-        if 'outputText' in response_body:
-            analysis_text = response_body['outputText']
-        elif 'results' in response_body and len(response_body['results']) > 0:
-            analysis_text = response_body['results'][0]['outputText']
-        else:
-            # 尝试其他可能的响应格式
-            analysis_text = str(response_body)
+        # 解析响应
+        analysis_text = response['output']['message']['content'][0]['text']
         
         return analysis_text
 
