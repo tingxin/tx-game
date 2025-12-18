@@ -23,7 +23,6 @@ class ImageAnalyzer {
     bindEvents() {
         // 文件选择事件
         this.uploadBtn.addEventListener('click', (e) => {
-            e.preventDefault();
             e.stopPropagation();
             this.fileInput.click();
         });
@@ -31,7 +30,6 @@ class ImageAnalyzer {
         this.uploadArea.addEventListener('click', (e) => {
             // 只有在上传区域可见时才触发文件选择
             if (this.uploadArea.style.display !== 'none') {
-                e.preventDefault();
                 e.stopPropagation();
                 this.fileInput.click();
             }
