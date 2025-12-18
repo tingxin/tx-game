@@ -59,7 +59,11 @@ def add_kiro_user():
         instance_arn, identity_store_id = get_sso_instance_info()
         
         # 创建 Identity Store 客户端
-        identity_store_client = boto3.client('identitystore')
+        if aws_config:
+            session = aws_config.get_boto3_session()
+            identity_store_client = session.client('identitystore')
+        else:
+            identity_store_client = boto3.client('identitystore')
         
         # 创建 kiro 用户
         response = identity_store_client.create_user(
@@ -107,7 +111,11 @@ def delete_kiro_user():
         instance_arn, identity_store_id = get_sso_instance_info()
         
         # 创建 Identity Store 客户端
-        identity_store_client = boto3.client('identitystore')
+        if aws_config:
+            session = aws_config.get_boto3_session()
+            identity_store_client = session.client('identitystore')
+        else:
+            identity_store_client = boto3.client('identitystore')
         
         # 获取 kiro 用户ID
         user_id = get_kiro_user_id()
@@ -135,7 +143,11 @@ def get_kiro_user_id():
         instance_arn, identity_store_id = get_sso_instance_info()
         
         # 创建 Identity Store 客户端
-        identity_store_client = boto3.client('identitystore')
+        if aws_config:
+            session = aws_config.get_boto3_session()
+            identity_store_client = session.client('identitystore')
+        else:
+            identity_store_client = boto3.client('identitystore')
         
         # 查找 kiro 用户
         response = identity_store_client.list_users(
@@ -160,6 +172,10 @@ def get_kiro_user_id():
 
 def check_kiro_user_exists():
     """检查 kiro 用户是否存在"""
+    # 确保先设置 AWS 凭证
+    if not setup_aws_credentials():
+        return False
+    
     user_id = get_kiro_user_id()
     if user_id:
         print(f"✅ kiro 用户存在 (ID: {user_id})")
