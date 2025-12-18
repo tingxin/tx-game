@@ -39,7 +39,7 @@
 ✨ 功能特性：
 - 拖拽上传图片
 - 实时预览
-- AWS Bedrock Sonnet 4 AI 分析
+- AWS Bedrock Nova Pro AI 分析
 - 结果复制功能
 - 响应式设计
 - 专业 UI 界面
@@ -47,7 +47,7 @@
 ⚙️ 技术栈：
 - 前端：纯 HTML + CSS + JavaScript
 - 后端：Python Flask
-- AI：AWS Bedrock Claude 3.5 Sonnet
+- AI：AWS Bedrock Nova Pro
 - 样式：原生 CSS + Font Awesome 图标
 
 🔧 注意事项：

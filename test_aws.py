@@ -35,33 +35,31 @@ def test_bedrock_connection():
             region_name=aws_region
         )
         
-        # 测试简单的文本请求
+        # 测试 Nova 模型的文本请求
         request_body = {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 100,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Hello, please respond with 'Connection successful!'"
-                        }
-                    ]
-                }
-            ]
+            "inputText": "Hello, please respond with 'Connection successful!'",
+            "textGenerationConfig": {
+                "maxTokenCount": 100,
+                "temperature": 0.7,
+                "topP": 0.9
+            }
         }
         
-        print("📡 发送测试请求...")
+        print("📡 发送测试请求到 Nova 模型...")
         response = bedrock_client.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
+            modelId="amazon.nova-pro-v1:0",
             body=json.dumps(request_body),
             contentType="application/json"
         )
         
-        # 解析响应
+        # 解析 Nova 响应
         response_body = json.loads(response['body'].read())
-        result = response_body['content'][0]['text']
+        if 'outputText' in response_body:
+            result = response_body['outputText']
+        elif 'results' in response_body and len(response_body['results']) > 0:
+            result = response_body['results'][0]['outputText']
+        else:
+            result = str(response_body)
         
         print(f"✅ 连接成功！响应: {result}")
         return True

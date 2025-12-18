@@ -50,41 +50,38 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def encode_image_to_base64(image_path):
-    """将图片编码为 base64"""
+    """将图片编码为 base64（用于 Nova 模型）"""
     with open(image_path, 'rb') as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
+        image_bytes = image_file.read()
+        return base64.b64encode(image_bytes).decode('utf-8')
 
 def analyze_image_with_bedrock(image_base64, image_format):
-    """使用 AWS Bedrock Sonnet 4 分析图片"""
+    """使用 AWS Bedrock Nova 模型分析图片"""
     try:
-        # 构建请求体
+        # Nova 模型请求体格式
         request_body = {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 2000,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": f"image/{image_format}",
-                                "data": image_base64
-                            }
-                        },
-                        {
-                            "type": "text",
-                            "text": """请详细分析这张图片的内容，包括：
+            "inputText": """请详细分析这张图片的内容，包括：
 1. 主要物体和场景描述
 2. 颜色、构图和视觉元素
 3. 可能的情感或氛围
 4. 任何文字内容（如果有）
 5. 图片的整体质量和特点
 
-请用中文回答，内容要详细且专业。"""
-                        }
-                    ]
+请用中文回答，内容要详细且专业。""",
+            "textGenerationConfig": {
+                "maxTokenCount": 2000,
+                "temperature": 0.7,
+                "topP": 0.9
+            },
+            "inferenceConfig": {
+                "max_new_tokens": 2000
+            },
+            "images": [
+                {
+                    "format": image_format.upper(),
+                    "source": {
+                        "bytes": image_base64
+                    }
                 }
             ]
         }
@@ -92,19 +89,27 @@ def analyze_image_with_bedrock(image_base64, image_format):
         # 获取 Bedrock 客户端并调用 API
         bedrock_client = get_bedrock_client()
         response = bedrock_client.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",  # Sonnet 4 模型ID
+            modelId="amazon.nova-pro-v1:0",  # Nova Pro 模型ID
             body=json.dumps(request_body),
             contentType="application/json"
         )
 
         # 解析响应
         response_body = json.loads(response['body'].read())
-        analysis_text = response_body['content'][0]['text']
+        
+        # Nova 模型的响应格式
+        if 'outputText' in response_body:
+            analysis_text = response_body['outputText']
+        elif 'results' in response_body and len(response_body['results']) > 0:
+            analysis_text = response_body['results'][0]['outputText']
+        else:
+            # 尝试其他可能的响应格式
+            analysis_text = str(response_body)
         
         return analysis_text
 
     except Exception as e:
-        logger.error(f"Bedrock API 调用失败: {str(e)}")
+        logger.error(f"Bedrock Nova API 调用失败: {str(e)}")
         raise Exception(f"AI 分析失败: {str(e)}")
 
 @app.route('/')
