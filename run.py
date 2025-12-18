@@ -20,24 +20,29 @@ def check_requirements():
         return False
 
 def check_aws_credentials():
-    """检查 AWS 凭证配置"""
-    aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
-    aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    """检查 AWS 配置"""
     aws_region = os.environ.get('AWS_REGION', 'us-east-1')
     
-    if not aws_access_key or not aws_secret_key:
-        print("⚠️  AWS 凭证未配置")
-        print("请设置环境变量:")
-        print("export AWS_ACCESS_KEY_ID=your_access_key_id")
-        print("export AWS_SECRET_ACCESS_KEY=your_secret_access_key")
-        print("export AWS_REGION=us-east-1  # 可选，默认 us-east-1")
-        print("\n或者在代码中直接设置:")
-        print("os.environ['AWS_ACCESS_KEY_ID'] = 'your_key'")
-        print("os.environ['AWS_SECRET_ACCESS_KEY'] = 'your_secret'")
-        return False
+    print(f"🌍 AWS 区域: {aws_region}")
+    print("🔐 使用 IAM Role 认证")
+    print("📋 请确保运行环境具有以下权限:")
+    print("   - bedrock:InvokeModel")
+    print("   - bedrock:Converse")
     
-    print(f"✅ AWS 凭证配置检查通过 (Region: {aws_region})")
-    return True
+    # 尝试获取当前身份
+    try:
+        import boto3
+        sts_client = boto3.client('sts', region_name=aws_region)
+        identity = sts_client.get_caller_identity()
+        print(f"✅ 当前身份: {identity.get('Arn', 'Unknown')}")
+        return True
+    except Exception as e:
+        print(f"⚠️  无法获取 AWS 身份: {str(e)}")
+        print("请确保:")
+        print("1. 运行环境有正确的 IAM Role")
+        print("2. 或者配置了 AWS CLI (aws configure)")
+        print("3. 或者设置了环境变量 AWS_PROFILE")
+        return False
 
 def main():
     print("🚀 启动图片分析器...")

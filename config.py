@@ -7,9 +7,9 @@ import os
 
 # 方式1: 直接在代码中设置（不推荐用于生产环境）
 # 取消注释并填入你的凭证
-# AWS_ACCESS_KEY_ID = "your_access_key_id_here"
-# AWS_SECRET_ACCESS_KEY = "your_secret_access_key_here"
-# AWS_REGION = "us-east-1"
+AWS_ACCESS_KEY_ID = "AKIAXQBNMLW66MU3476K"
+AWS_SECRET_ACCESS_KEY = "ZKmqJZjw4aDG5tBvLbBtxU+brS0+Rl7Wuk1oesg+"
+AWS_REGION = "us-east-1"
 
 # 方式2: 从环境变量读取（推荐）
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')

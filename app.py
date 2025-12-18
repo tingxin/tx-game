@@ -6,14 +6,9 @@ import json
 import os
 from werkzeug.utils import secure_filename
 import logging
-from config import setup_aws_credentials
-
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# 设置 AWS 凭证
-setup_aws_credentials()
 
 app = Flask(__name__)
 CORS(app)
@@ -27,23 +22,21 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # AWS Bedrock 配置
-# 从环境变量获取 AK/SK
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+# 使用 IAM Role，不需要显式配置 AK/SK
 AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')  # Nova 模型在 us-east-1 可用
 
 # 初始化 Bedrock 客户端
 def get_bedrock_client():
-    """获取 Bedrock 客户端"""
-    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
-        raise Exception("AWS 凭证未配置，请设置 AWS_ACCESS_KEY_ID 和 AWS_SECRET_ACCESS_KEY 环境变量")
-    
-    return boto3.client(
-        'bedrock-runtime',
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        region_name=AWS_REGION
-    )
+    """获取 Bedrock 客户端 - 使用 IAM Role"""
+    try:
+        # 使用默认凭证链（IAM Role、环境变量、AWS CLI 配置等）
+        return boto3.client(
+            'bedrock-runtime',
+            region_name=AWS_REGION
+        )
+    except Exception as e:
+        logger.error(f"无法创建 Bedrock 客户端: {str(e)}")
+        raise Exception("AWS 凭证配置错误，请确保运行环境有正确的 IAM 权限")
 
 def allowed_file(filename):
     return '.' in filename and \

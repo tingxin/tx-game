@@ -6,32 +6,19 @@
 import os
 import boto3
 import json
-from config import setup_aws_credentials
 
 def test_bedrock_connection():
     """测试 Bedrock 连接"""
     print("🔍 测试 AWS Bedrock 连接...")
     
-    # 设置凭证
-    setup_aws_credentials()
-    
-    # 检查凭证
-    aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
-    aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
     aws_region = os.environ.get('AWS_REGION', 'us-east-1')
-    
-    if not aws_access_key or not aws_secret_key:
-        print("❌ AWS 凭证未配置")
-        return False
-    
-    print(f"✅ 凭证已配置 (Region: {aws_region})")
+    print(f"🌍 使用区域: {aws_region}")
+    print("🔐 使用 IAM Role 认证")
     
     try:
-        # 创建 Bedrock 客户端
+        # 创建 Bedrock 客户端 - 使用默认凭证链
         bedrock_client = boto3.client(
             'bedrock-runtime',
-            aws_access_key_id=aws_access_key,
-            aws_secret_access_key=aws_secret_key,
             region_name=aws_region
         )
         
