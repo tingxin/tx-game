@@ -1,0 +1,10 @@
+# 核心依赖 - 运行 IAM Identity Center 用户管理所需的最小依赖
+
+# AWS SDK for Python
+boto3>=1.34.0
+
+# HTTP 请求库 (用于 Kiro API 调用)
+requests>=2.31.0
+
+# 环境变量管理
+python-dotenv>=1.0.0
