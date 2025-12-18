@@ -193,6 +193,7 @@ def health_check():
 
 if __name__ == '__main__':
     print("🚀 图片分析服务启动中...")
+    print("🤖 使用 AWS Bedrock Nova Pro 模型")
     print("📝 请确保已配置 AWS 凭证")
     print("🌐 访问 http://localhost:5000 使用应用")
     
