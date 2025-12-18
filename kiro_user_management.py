@@ -5,8 +5,36 @@
 """
 
 import boto3
+import os
 from botocore.exceptions import ClientError
-from config import setup_aws_credentials
+
+def setup_aws_credentials():
+    """设置 AWS 凭证"""
+    # 方式1: 从环境变量读取（推荐）
+    aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+    aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    aws_region = os.environ.get('AWS_REGION', 'us-east-1')
+    
+    if aws_access_key and aws_secret_key:
+        print(f"✅ 使用环境变量中的 AWS 凭证，区域: {aws_region}")
+        return True
+    
+    # 方式2: 使用 AWS CLI 配置或 IAM 角色
+    try:
+        # 测试是否有有效的凭证
+        sts = boto3.client('sts')
+        identity = sts.get_caller_identity()
+        print(f"✅ 使用默认 AWS 凭证，账户: {identity.get('Account')}")
+        return True
+    except Exception as e:
+        print(f"❌ AWS 凭证配置错误: {e}")
+        print("\n请配置 AWS 凭证:")
+        print("1. 设置环境变量:")
+        print("   export AWS_ACCESS_KEY_ID=your_access_key")
+        print("   export AWS_SECRET_ACCESS_KEY=your_secret_key")
+        print("   export AWS_REGION=us-east-1")
+        print("2. 或运行: aws configure")
+        return False
 
 def get_sso_instance_info():
     """获取 SSO 实例信息"""
