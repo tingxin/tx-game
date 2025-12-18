@@ -14,7 +14,7 @@ import os
 # 方式2: 从环境变量读取（推荐）
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')  # Nova 模型在 us-east-1 可用
 
 def setup_aws_credentials():
     """设置 AWS 凭证到环境变量"""

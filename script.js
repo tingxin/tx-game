@@ -22,8 +22,21 @@ class ImageAnalyzer {
 
     bindEvents() {
         // 文件选择事件
-        this.uploadBtn.addEventListener('click', () => this.fileInput.click());
-        this.uploadArea.addEventListener('click', () => this.fileInput.click());
+        this.uploadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.fileInput.click();
+        });
+
+        this.uploadArea.addEventListener('click', (e) => {
+            // 只有在上传区域可见时才触发文件选择
+            if (this.uploadArea.style.display !== 'none') {
+                e.preventDefault();
+                e.stopPropagation();
+                this.fileInput.click();
+            }
+        });
+
         this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
 
         // 拖拽事件
@@ -32,9 +45,23 @@ class ImageAnalyzer {
         this.uploadArea.addEventListener('drop', (e) => this.handleDrop(e));
 
         // 按钮事件
-        this.analyzeBtn.addEventListener('click', () => this.analyzeImage());
-        this.resetBtn.addEventListener('click', () => this.resetUpload());
-        this.copyBtn.addEventListener('click', () => this.copyResults());
+        this.analyzeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.analyzeImage();
+        });
+
+        this.resetBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.resetUpload();
+        });
+
+        this.copyBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.copyResults();
+        });
     }
 
     handleDragOver(e) {
